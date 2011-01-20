@@ -79,7 +79,8 @@ class Modifiers implements Comparable {
                 res += "non-final to final.<br>";
             hasContent = true;
         }
-        if (isDeprecated != newModifiers.isDeprecated) {
+        if (!HTMLReportGenerator.incompatibleChangesOnly &&
+        	isDeprecated != newModifiers.isDeprecated) {
             if (hasContent)
                 res += " ";
             if (isDeprecated)

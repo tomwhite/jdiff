@@ -164,6 +164,10 @@ public class HTMLReportGenerator {
      * constructors, methods and fields.
      */
     public void writeReport(APIDiff apiDiff) {
+      
+	if (incompatibleChangesOnly) {
+	  removeIncompatibleChanges(apiDiff);
+	}
 
         // Report packages which were removed in the new API
         if (apiDiff.packagesRemoved.size() != 0) {
@@ -179,7 +183,7 @@ public class HTMLReportGenerator {
         }
         
         // Report packages which were added in the new API
-        if (apiDiff.packagesAdded.size() != 0) {
+        if (!incompatibleChangesOnly && apiDiff.packagesAdded.size() != 0) {
             writeTableStart("Added Packages", 2);
             Iterator iter = apiDiff.packagesAdded.iterator();
             while (iter.hasNext()) {
@@ -216,6 +220,30 @@ public class HTMLReportGenerator {
         }
     }
     
+    private void removeIncompatibleChanges(APIDiff apiDiff) {
+	for (Iterator iter = apiDiff.packagesChanged.iterator(); iter.hasNext();) {
+	    PackageDiff pkgDiff = (PackageDiff) (iter.next());
+	    for (Iterator i = pkgDiff.classesChanged.iterator(); i.hasNext();) {
+		ClassDiff classDiff = (ClassDiff) i.next();
+		boolean hasCtors = classDiff.ctorsRemoved.size() != 0
+			|| classDiff.ctorsChanged.size() != 0;
+		boolean hasMethods = classDiff.methodsRemoved.size() != 0
+			|| classDiff.methodsChanged.size() != 0;
+		boolean hasFields = classDiff.fieldsRemoved.size() != 0
+			|| classDiff.fieldsChanged.size() != 0;
+		if (!(hasCtors || hasMethods || hasFields
+			|| classDiff.inheritanceChange_ != null
+			|| classDiff.modifiersChange_ != null)) {
+		    i.remove();
+		}
+	    }
+	    if (pkgDiff.classesChanged.isEmpty()
+		    && pkgDiff.classesRemoved.isEmpty()) {
+		iter.remove();
+	    }
+	}
+    }
+
     /** 
      * Write out the details of a changed package in a separate file. 
      */
@@ -319,7 +347,7 @@ public class HTMLReportGenerator {
         }
         
         // Report classes which were added in the new API
-        if (pkgDiff.classesAdded.size() != 0) {
+        if (!incompatibleChangesOnly && pkgDiff.classesAdded.size() != 0) {
             // Determine the title for this section
             boolean hasClasses = false;
             boolean hasInterfaces = false;
@@ -390,7 +418,7 @@ public class HTMLReportGenerator {
         reportFile.close();
         reportFile = oldReportFile;
     }
-
+    
     /** 
      * Write out the details of a changed class in a separate file. 
      */
@@ -521,7 +549,7 @@ public class HTMLReportGenerator {
         }
 
         // Report ctors which were added in the new API
-        if (classDiff.ctorsAdded.size() != 0) {
+        if (!incompatibleChangesOnly && classDiff.ctorsAdded.size() != 0) {
             writeTableStart("Added Constructors", 2);
             Iterator iter = classDiff.ctorsAdded.iterator();
             while (iter.hasNext()) {
@@ -573,7 +601,7 @@ public class HTMLReportGenerator {
         }
 
         // Report methods which were added in the new API
-        if (classDiff.methodsAdded.size() != 0) {
+        if (!incompatibleChangesOnly && classDiff.methodsAdded.size() != 0) {
             writeTableStart("Added Methods", 2);
             Iterator iter = classDiff.methodsAdded.iterator();
             while (iter.hasNext()) {
@@ -620,7 +648,7 @@ public class HTMLReportGenerator {
         }
         
         // Report fields which were added in the new API
-        if (classDiff.fieldsAdded.size() != 0) {
+        if (!incompatibleChangesOnly && classDiff.fieldsAdded.size() != 0) {
             writeTableStart("Added Fields", 2);
             Iterator iter = classDiff.fieldsAdded.iterator();
             while (iter.hasNext()) {
@@ -1970,6 +1998,12 @@ public class HTMLReportGenerator {
      * between the old and the new API. The default is that this is not set.
      */
     public static boolean reportDocChanges = false;
+
+    /** 
+     * If set, then only report incompatible changes
+     * between the old and the new API. The default is that this is not set.
+     */
+    public static boolean incompatibleChangesOnly = false;
 
     /** 
      * Define the prefix for HTML links to the existing set of Javadoc-

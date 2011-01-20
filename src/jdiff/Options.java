@@ -70,6 +70,7 @@ public class Options {
 
         if (opt.equals("-firstsentence"))    return 1;
         if (opt.equals("-docchanges"))    return 1;
+        if (opt.equals("-incompatible"))    return 1;
         if (opt.equals("-packagesonly"))    return 1;
         if (opt.equals("-showallchanges"))    return 1;
 
@@ -300,6 +301,10 @@ public class Options {
                 Diff.noDocDiffs = false;
                 continue;
             }
+            if (options[i][0].toLowerCase().equals("-incompatible")) {
+              HTMLReportGenerator.incompatibleChangesOnly = true;
+              continue;
+            }
             if (options[i][0].toLowerCase().equals("-packagesonly")) {
                 RootDocToXML.packagesOnly = true;
                 continue;
@@ -415,6 +420,7 @@ public class Options {
         
         System.err.println("  -firstsentence Save only the first sentence of each comment block with the API.");
         System.err.println("  -docchanges Report changes in Javadoc comments between the APIs");
+        System.err.println("  -incompatible Only report incompatible changes");
         System.err.println("  -nosuggest [all|remove|add|change] Do not add suggested comments to all, or the removed, added or chabged sections");
         System.err.println("  -checkcomments Check that comments are sentences");
         System.err.println("  -stripnonprinting Remove non-printable characters from comments.");

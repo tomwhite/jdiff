@@ -188,6 +188,11 @@ public class JDiffAntTask {
 	    // There are no arguments to this argument
 	    dInfo.createParam().setName("-docchanges");
 	}
+	
+	if (getIncompatible()) {
+	    // There are no arguments to this argument
+	    dInfo.createParam().setName("-incompatible");
+	}
 
 	// Execute the Javadoc command to compare the two XML files
 	jd.perform();
@@ -414,6 +419,19 @@ public class JDiffAntTask {
 
     public boolean getDocchanges() {
 	return this.docchanges;
+    }
+    
+    /** 
+     * Add the -incompatible argument, to only report incompatible changes.
+     */ 
+    private boolean incompatible = false;
+
+    public void setIncompatible(boolean value) {
+	this.incompatible = value;
+    }
+
+    public boolean getIncompatible() {
+	return this.incompatible;
     }
 
     /** 
